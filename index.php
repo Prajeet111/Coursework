@@ -35,26 +35,102 @@
     }
     
     </style>
-    <!--javascript code to retrieve live weather data from the OpenWeatherMap API -->
-<script>
-    fetch('https://prajeet111.github.io/Coursework/') //retrive the data from the php.
-    .then (function(response){
-        return response.json();
-    })
-    .then (function(answer){
-        document.getElementById("description").innerHTML=answer.weather_description
-        document.getElementById("city").innerHTML=answer.weather_city
-        document.getElementById("tem").innerHTML=answer.weather_temperature+"°C"
-        document.getElementById("humidity").innerHTML=answer.weather_humidity + "%"
-        document.getElementById("speed").innerHTML=answer.weather_speed+"km/hr"
-        document.getElementById("pre").innerHTML=answer.weather_pressure + " hPa"
-        document.getElementById("maxtem").innerHTML=answer.weather_maxtemp+"°C"
-        document.getElementById("mintem").innerHTML=answer.weather_mintemp+"°C"
-        document.getElementById("datetimes").innerHTML=answer.weather_datetimes
-        document.getElementById('icon').src=` http://openweathermap.org/img/wn/${answer.weather_icon}@2x.png`
-    })
 
-</script>
+    <!--javascript code to retrieve live weather data from the OpenWeatherMap API -->
+    <script>
+
+    // Register service worker
+    if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+    navigator.serviceWorker.register('Serviceworker.js').then(function(registration) {
+    // Registration was successful
+    console.log('ServiceWorker registration successful');
+    }, function(err) {
+    // registration failed :(
+    console.log('ServiceWorker registration failed: ', err);
+    });
+    });
+    
+    }
+    
+    // Check browser cache first, use if there and less than 10 seconds old
+    if(localStorage.when != null
+    && parseInt(localStorage.when) + 1000 > Date.now()) {
+    let freshness = Math.round((Date.now() - localStorage.when)/1000) + " second(s)";
+            document.getElementById("description").innerHTML=localStorage.description
+            document.getElementById("city").innerHTML=localStorage.city
+            document.getElementById("tem").innerHTML=localStorage.tem+"°C"
+            document.getElementById("humidity").innerHTML=localStorage.humidity + "%"
+            document.getElementById("speed").innerHTML=localStorage.speed+"km/hr"
+            document.getElementById("pre").innerHTML=localStorage.pre + " hPa"
+            document.getElementById("maxtem").innerHTML=localStorage.maxtem+"°C"
+            document.getElementById("mintem").innerHTML=localStorage.mintem+"°C"
+            document.getElementById("datetimes").innerHTML=localStorage.datetimes
+            document.getElementById("LastUpdate").innerHTML = freshness;
+    
+    } 
+    // No local cache, access network
+    else 
+    {
+    // Fetch weather data from API for given city
+    fetch('retrive-api.php?city=Minneapolis') //retrive the data from the php.
+    // Convert response string to json object
+    .then(response => response.json())
+    .then(response => {
+
+    // Copy one element of response to our HTML paragraph
+            document.getElementById("description").innerHTML=response.weather_description
+            document.getElementById("city").innerHTML=response.weather_city
+            document.getElementById("tem").innerHTML=response.weather_temperature+"°C"
+            document.getElementById("humidity").innerHTML=response.weather_humidity + "%"
+            document.getElementById("speed").innerHTML=response.weather_speed+"km/hr"
+            document.getElementById("pre").innerHTML=response.weather_pressure + " hPa"
+            document.getElementById("maxtem").innerHTML=response.weather_maxtemp+"°C"
+            document.getElementById("mintem").innerHTML=response.weather_mintemp+"°C"
+            document.getElementById("datetimes").innerHTML=response.weather_datetimes
+            document.getElementById('icon').src=` http://openweathermap.org/img/wn/${response.weather_icon}@2x.png`
+    
+    // Save new data to browser, with new timestamp
+
+    localStorage.description = response.weather_description;
+    localStorage.tem = response.weather_temperature + '°';
+    localStorage.when = Date.now(); // milliseconds since January 1 1970
+    localStorage.city = response.weather_city;
+    localStorage.humidity = response.weather_humidity;
+    localStorage.speed = response.weather_speed;
+    localStorage.pre = response.weather_pressure;
+    localStorage.maxtem = response.weather_maxtemp;
+    localStorage.mintem = response.weather_mintemp;
+    localStorage.datetimes = response.weather_datetimes;
+    
+    
+    })
+    .catch(err => {
+        if(localStorage.when != null) {
+
+    // Get data from browser cache
+    let freshness = Math.round((Date.now() - localStorage.when)/1000) + " second(s)";
+            document.getElementById("description").innerHTML=localStorage.description
+            document.getElementById("city").innerHTML=localStorage.city
+            document.getElementById("tem").innerHTML=localStorage.tem+"°C"
+            document.getElementById("humidity").innerHTML=localStorage.humidity + "%"
+            document.getElementById("speed").innerHTML=localStorage.speed+"km/hr"
+            document.getElementById("pre").innerHTML=localStorage.pre + " hPa"
+            document.getElementById("maxtem").innerHTML=localStorage.maxtem+"°C"
+            document.getElementById("mintem").innerHTML=localStorage.mintem+"°C"
+            document.getElementById("datetimes").innerHTML=localStorage.datetimes
+            document.getElementById("LastUpdate").innerHTML = freshness; 
+    } 
+    else
+     {
+    // Display errors in console
+    console.log(err);
+    }
+    
+    
+    });
+    }
+    </script>
 <body id="back">
     <h1 align="center">Weather app</h1>
     <!--structure of the application-->
@@ -106,7 +182,11 @@
             <tr>
                 <td >Date/Time :</td>
                 <td id="datetimes"></td>
-            </tr>                   
+            </tr>  
+            <tr>
+                <td >Last Update:</td>
+                <td id="LastUpdate"></td>
+            </tr>                  
         </table>
         
 
