@@ -123,7 +123,7 @@
     } 
     else
      {
-    // Display errors in console
+    // Display errors in consolee
     console.log(err);
     }
     
