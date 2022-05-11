@@ -73,7 +73,7 @@
     else 
     {
     // Fetch weather data from API for given city
-    fetch('retrive-api.php?city=Minneapolis') //retrive the data from the php.
+    fetch('retrive-api.php?city=Kathmandu') //retrive the data from the php.
     // Convert response string to json object
     .then(response => response.json())
     .then(response => {
